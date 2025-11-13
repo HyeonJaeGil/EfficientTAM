@@ -589,7 +589,8 @@ class EfficientTAMVideoPredictor(EfficientTAMBase):
             )
             processing_order = range(start_frame_idx, end_frame_idx + 1)
 
-        for frame_idx in tqdm(processing_order, desc="propagate in video"):
+        # for frame_idx in tqdm(processing_order, desc="propagate in video"):
+        for frame_idx in processing_order:
             pred_masks_per_obj = [None] * batch_size
             for obj_idx in range(batch_size):
                 obj_output_dict = inference_state["output_dict_per_obj"][obj_idx]
@@ -801,6 +802,7 @@ class EfficientTAMVideoPredictor(EfficientTAMBase):
         # object pointer is a small tensor, so we always keep it on GPU memory for fast access
         obj_ptr = current_out["obj_ptr"]
         object_score_logits = current_out["object_score_logits"]
+        ious = current_out["ious"]
         # make a compact version of this frame's output to reduce the state size
         compact_current_out = {
             "maskmem_features": maskmem_features,
@@ -808,6 +810,7 @@ class EfficientTAMVideoPredictor(EfficientTAMBase):
             "pred_masks": pred_masks,
             "obj_ptr": obj_ptr,
             "object_score_logits": object_score_logits,
+            "ious": ious,
         }
         return compact_current_out, pred_masks_gpu
 

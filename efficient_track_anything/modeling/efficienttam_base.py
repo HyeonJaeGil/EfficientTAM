@@ -386,6 +386,8 @@ class EfficientTAMBase(torch.nn.Module):
             batch_inds = torch.arange(B, device=device)
             low_res_masks = low_res_multimasks[batch_inds, best_iou_inds].unsqueeze(1)
             high_res_masks = high_res_multimasks[batch_inds, best_iou_inds].unsqueeze(1)
+            # use best iou_inds for ious
+            ious = ious[batch_inds, best_iou_inds].unsqueeze(1)
             if sam_output_tokens.size(1) > 1:
                 sam_output_token = sam_output_tokens[batch_inds, best_iou_inds]
         else:
@@ -851,7 +853,7 @@ class EfficientTAMBase(torch.nn.Module):
         (
             _,
             _,
-            _,
+            ious,
             low_res_masks,
             high_res_masks,
             obj_ptr,
@@ -861,6 +863,7 @@ class EfficientTAMBase(torch.nn.Module):
         current_out["pred_masks"] = low_res_masks
         current_out["pred_masks_high_res"] = high_res_masks
         current_out["obj_ptr"] = obj_ptr
+        current_out["ious"] = ious
         if not self.training:
             # Only add this in inference (to avoid unused param in activation checkpointing;
             # it's mainly used in the demo to encode spatial memories w/ consolidated masks)
